@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "284163184884",
+    "project_id": "rockettranslatenative",
+    "storage_bucket": "rockettranslatenative.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284163184884:android:24ea6acb9f985c24a326a1",
+        "android_client_info": {
+          "package_name": "com.hamaro.rockettranslatenativeapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxx_nzfrUNe7lO7UYOWr7gkIdWRZYtI7g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
