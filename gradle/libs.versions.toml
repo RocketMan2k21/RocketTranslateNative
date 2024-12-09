@@ -17,8 +17,11 @@ kotlinxCoroutinesCore = "1.9.0-RC.2"
 kotlinxDatetime = "0.6.0"
 googleGson = "2.8.6"
 
+accompanist = "0.36.0"
+
 camerax = "1.4.0"
 navigationCompose = "2.8.4"
+firebaseFirestoreKtx = "25.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -56,6 +59,8 @@ androidx-camera-extensions = { module = "androidx.camera:camera-extensions", ver
 coil = { module = "io.coil-kt:coil", version = "2.6.0" }
 
 google-gson = {module = "com.google.code.gson:gson", version.ref = "googleGson"}
+google-accompanist-permissions = {module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist"}
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

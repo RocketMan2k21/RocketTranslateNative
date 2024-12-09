@@ -8,19 +8,20 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.hamaro.rockettranslatenativeapp.MainViewModel
+import com.hamaro.rockettranslatenativeapp.ui.navigation.home.SetupHomeNavigation
+import com.hamaro.rockettranslatenativeapp.ui.navigation.route.HomeDestination
+import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.CameraPermission
 
-fun NavGraphBuilder.mainComposable(
-
-) {
+fun NavGraphBuilder.mainComposable() {
     composable(
         route = MainViewModel.Destination.Main.route
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "Hello World")
-        }
+        val navController = rememberNavController()
+        SetupHomeNavigation(
+            navController = navController,
+            startDestination = HomeDestination.Permission
+        )
     }
 }

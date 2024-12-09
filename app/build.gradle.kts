@@ -19,6 +19,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "TRANSLATION_API_KEY", "\"${project.findProperty("TRANSLATION_API_KEY") ?: ""}\"")
     }
 
     buildTypes {
@@ -28,6 +30,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
         }
     }
     compileOptions {
@@ -39,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        android.buildFeatures.buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -60,6 +64,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -88,5 +94,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     implementation (libs.koin.androidx.compose)
+
+    implementation (libs.google.accompanist.permissions)
+
+    implementation ("com.deepl.api:deepl-java:1.7.0")
 
 }

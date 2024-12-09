@@ -1,4 +1,4 @@
-package com.hamaro.rockettranslatenativeapp.data.repository
+package com.hamaro.rockettranslatenativeapp.data.remote.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
