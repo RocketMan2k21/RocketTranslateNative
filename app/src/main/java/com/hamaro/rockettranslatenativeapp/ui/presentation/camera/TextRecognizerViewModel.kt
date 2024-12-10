@@ -7,11 +7,10 @@ import android.provider.MediaStore
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hamaro.rockettranslatenativeapp.domain.TextRecognizer
 import com.hamaro.rockettranslatenativeapp.domain.base.BaseViewModel
-import com.roman_duda.rockettranslateapp.utils.BitmapUtils
+import com.roman_duda.rockettranslateapp.utils.ImageUtils
 import kotlinx.coroutines.launch
 
 class TextRecognizerViewModel(
@@ -25,7 +24,7 @@ class TextRecognizerViewModel(
         _imageText.value = ImageTextUiState.Loading
 
         val bitmap: Bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-        BitmapUtils.scaleBitmapDown(
+        ImageUtils.scaleBitmapDown(
             bitmap,
             maxDimension = 640
         )

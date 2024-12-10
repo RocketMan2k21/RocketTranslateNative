@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.hamaro.rockettranslatenativeapp.MainViewModel
 import com.hamaro.rockettranslatenativeapp.ui.navigation.home.screens.cameraPreviewComposable
+import com.hamaro.rockettranslatenativeapp.ui.navigation.home.screens.historyComposable
 import com.hamaro.rockettranslatenativeapp.ui.navigation.home.screens.permissionComposable
 import com.hamaro.rockettranslatenativeapp.ui.navigation.route.HomeDestination
 
@@ -28,5 +29,9 @@ fun SetupHomeNavigation(
         cameraPreviewComposable {
 
         }
+        historyComposable(
+            navigateBack = screens.navigateBack,
+            onImageClick = {}
+        )
     }
 }

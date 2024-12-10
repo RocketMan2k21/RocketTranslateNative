@@ -3,7 +3,9 @@ package com.hamaro.rockettranslatenativeapp.data.remote.repository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hamaro.rockettranslatenativeapp.domain.AuthService
 import com.hamaro.rockettranslatenativeapp.domain.ImageRepository
-import com.hamaro.rockettranslatenativeapp.domain.model.ImageRequest
+import com.hamaro.rockettranslatenativeapp.data.remote.model.ImageRequest
+import com.hamaro.rockettranslatenativeapp.domain.model.ImageFirestore
+import com.hamaro.rockettranslatenativeapp.domain.model.ImageHistory
 import com.hamaro.rockettranslatenativeapp.domain.model.RequestState
 import kotlinx.coroutines.tasks.await
 
@@ -42,7 +44,7 @@ class ImageRepositoryImpl(
         }
     }
 
-    override suspend fun getAllImages(): RequestState<List<ImageRequest>> {
+    override suspend fun getAllImages(): RequestState<ImageHistory> {
         return try {
             val userId = getCurrentUserId()
             val userDocRef = firestore.collection(usersCollection).document(userId)
@@ -54,12 +56,12 @@ class ImageRepositoryImpl(
                 RequestState.Error("No images found for the user.")
             } else {
                 val images = snapshot.documents.map { doc ->
-                    ImageRequest(
-                        base64 = doc.getString("base64") ?: "",
-                        dateTimeCaptured = doc.getString("date_time_captured") ?: ""
+                    ImageFirestore(
+                        imageBaseEncoded = doc.getString("base64") ?: "",
+                        createdAt = doc.getString("date_time_captured") ?: ""
                     )
                 }
-                RequestState.Success(images)
+                RequestState.Success(ImageHistory(images))
             }
         } catch (e: Exception) {
             RequestState.Error(e.message ?: "Failed to retrieve images")
