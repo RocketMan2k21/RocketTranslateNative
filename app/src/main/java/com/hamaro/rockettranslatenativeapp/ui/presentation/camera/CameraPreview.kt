@@ -10,7 +10,11 @@ import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -54,11 +59,17 @@ fun CameraPreview(
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
         cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
-        preview.setSurfaceProvider(previewView.surfaceProvider)
+        preview.surfaceProvider = previewView.surfaceProvider
     }
-    Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
+    Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier
+        .fillMaxSize()
+        ) {
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
-        Button(onClick = {
+        Button(
+            modifier = Modifier
+                .padding(bottom =
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+            onClick = {
             CameraCaptureService.captureImage(
                 imageCapture,
                 context,
@@ -86,9 +97,7 @@ fun CameraPreview(
         when (imageText) {
             is ImageTextUiState.Error -> {
                 val error = (imageText as ImageTextUiState.Error).message
-                AnimatedContent(error, label = "") { text: String ->
-                    Text(text)
-                }
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
             }
 
             ImageTextUiState.Idle -> {

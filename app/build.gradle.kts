@@ -69,7 +69,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
@@ -98,5 +97,9 @@ dependencies {
     implementation (libs.google.accompanist.permissions)
 
     implementation ("com.deepl.api:deepl-java:1.7.0")
+
+    implementation ("com.google.guava:guava:33.3.1-android")
+
+    implementation ("com.google.mlkit:text-recognition:16.0.1")
 
 }

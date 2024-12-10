@@ -1,7 +1,10 @@
 package com.hamaro.rockettranslatenativeapp.data.remote.repository
 
+import android.graphics.Bitmap
 import android.util.Log
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.ktx.functions
+import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
@@ -11,18 +14,21 @@ import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 import com.hamaro.rockettranslatenativeapp.domain.TextRecognizer
 import com.hamaro.rockettranslatenativeapp.domain.model.RequestState
+import com.roman_duda.rockettranslateapp.utils.BitmapUtils
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class AndroidTextRecognizer(
-    private val functions: FirebaseFunctions
 ) : TextRecognizer {
 
-    override suspend fun recognizeText(base64encoded: String): RequestState<String> {
+    private lateinit var functions : FirebaseFunctions
+
+    override suspend fun recognizeText(bitmap: Bitmap): RequestState<String> {
+        val base64encoded = BitmapUtils.convertToBase64(bitmap)
         Log.d("Debug", "Starting text recognition")
         Log.d("Debug", "Base64 input: $base64encoded")
-
+        functions = Firebase.functions
         return try {
             val request = JsonObject().apply {
                 add("image", JsonObject().apply {

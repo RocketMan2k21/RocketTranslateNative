@@ -1,7 +1,8 @@
 package com.hamaro.rockettranslatenativeapp.domain
 
+import android.graphics.Bitmap
 import com.hamaro.rockettranslatenativeapp.domain.model.RequestState
 
 interface TextRecognizer {
-    suspend fun recognizeText(base64encoded: String) : RequestState<String>
+    suspend fun recognizeText(bitmap: Bitmap) : RequestState<String>
 }

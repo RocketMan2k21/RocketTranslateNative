@@ -5,6 +5,7 @@ import com.google.firebase.functions.FirebaseFunctions
 import com.hamaro.rockettranslatenativeapp.MainViewModel
 import com.hamaro.rockettranslatenativeapp.data.remote.repository.AndroidTextRecognizer
 import com.hamaro.rockettranslatenativeapp.data.remote.repository.AuthServiceImpl
+import com.hamaro.rockettranslatenativeapp.data.remote.repository.LocalTextRecognizer
 import com.hamaro.rockettranslatenativeapp.domain.AuthService
 import com.hamaro.rockettranslatenativeapp.domain.TextRecognizer
 import com.hamaro.rockettranslatenativeapp.ui.presentation.auth.AuthViewModel
@@ -14,7 +15,7 @@ import org.koin.dsl.module
 
 val appModule = module {
     single<AuthService>{ AuthServiceImpl(auth = FirebaseAuth.getInstance()) }
-    single<TextRecognizer>{ AndroidTextRecognizer(functions = FirebaseFunctions.getInstance()) }
+    single<TextRecognizer>{ LocalTextRecognizer() }
     factory { AuthViewModel(authService = get()) }
     factory { MainViewModel(authViewModel = get()) }
     factory { TextRecognizerViewModel(textRecognizer = get()) }

@@ -1,10 +1,10 @@
 package com.hamaro.rockettranslatenativeapp.data.remote.repository
 
 import com.deepl.api.Translator
+import com.hamaro.rockettranslatenativeapp.BuildConfig
 import com.hamaro.rockettranslatenativeapp.domain.model.RequestState
 import com.hamaro.rockettranslatenativeapp.domain.TextTranslationService
 import com.hamaro.rockettranslatenativeapp.domain.model.TranslatedText
-import org.koin.android.BuildConfig
 
 class TextTranslationServiceImpl(
 ) : TextTranslationService {

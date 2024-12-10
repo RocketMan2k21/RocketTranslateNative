@@ -27,13 +27,13 @@ class TextRecognizerViewModel(
         val bitmap: Bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         BitmapUtils.scaleBitmapDown(
             bitmap,
-            maxDimension = 1024
+            maxDimension = 640
         )
 
         try {
             viewModelScope.launch {
                 val result = textRecognizer
-                    .recognizeText(BitmapUtils.convertToBase64(bitmap))
+                    .recognizeText(bitmap)
 
                 if (!result.isError())
                     _imageText.value = ImageTextUiState.Success(result.getSuccessData())
