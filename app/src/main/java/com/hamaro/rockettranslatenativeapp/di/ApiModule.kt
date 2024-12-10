@@ -20,7 +20,7 @@ val apiModule = module {
     }
     single<Retrofit> {
         Retrofit.Builder()
-            .baseUrl("https://api-free.deepl.com/v2")
+            .baseUrl("https://api-free.deepl.com/")
             .client(get())
             .addConverterFactory(GsonConverterFactory.create())
             .build()

@@ -23,21 +23,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 val appModule = module {
-    single<OkHttpClient> {
-        OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .addInterceptor(OkHttpInterceptor())
-            .build()
-    }
-    single<Retrofit> {
-        Retrofit.Builder()
-            .baseUrl("https://api-free.deepl.com/")
-            .client(get())
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
     single<AuthService>{ AuthServiceImpl(auth = FirebaseAuth.getInstance()) }
     single<TextRecognizer>{ LocalTextRecognizer() }
     single<TextTranslationService> { TextTranslationRepositoryImpl(translationApi = get()) }
@@ -50,6 +35,6 @@ val appModule = module {
 
 fun initializeKoin() {
     startKoin {
-        modules(appModule)
+        modules(listOf(apiModule, appModule))
     }
 }
