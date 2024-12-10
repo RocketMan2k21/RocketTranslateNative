@@ -14,22 +14,10 @@ class TranslationViewModel(
     var translationState = mutableStateOf<TranslationUiState>(TranslationUiState.Idle)
         private set
 
-    fun translateText(sourceText: String, targetLanguage: String) {
-        translationState.value = TranslationUiState.Loading
+    var currentText = mutableStateOf("")
+     private set
 
-        viewModelScope.launch {
-            val result = translationService.translate(sourceText, null, targetLanguage)
-
-            translationState.value = when (result) {
-                is RequestState.Success -> TranslationUiState.Success(result.data.text)
-                is RequestState.Error -> TranslationUiState.Error(result.message)
-                RequestState.Idle -> TranslationUiState.Idle
-                RequestState.Loading -> TranslationUiState.Loading
-            }
-        }
-    }
-
-    fun translateTextWithSourceLang(sourceText: String, sourceLanguage: String, targetLanguage: String) {
+    fun translateText(sourceText: String, sourceLanguage: String? = null, targetLanguage: String) {
         translationState.value = TranslationUiState.Loading
 
         viewModelScope.launch {
@@ -42,6 +30,10 @@ class TranslationViewModel(
                 RequestState.Loading -> TranslationUiState.Loading
             }
         }
+    }
+
+    fun updateCurrentText(text : String) {
+        currentText.value = text
     }
 }
 
