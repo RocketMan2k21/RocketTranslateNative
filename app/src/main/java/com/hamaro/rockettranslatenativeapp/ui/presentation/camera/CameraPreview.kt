@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +43,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.hamaro.rockettranslatenativeapp.data.CameraCaptureService
 import com.hamaro.rockettranslatenativeapp.domain.model.TargetLanguage
+import com.hamaro.rockettranslatenativeapp.domain.model.UiState
+import com.hamaro.rockettranslatenativeapp.ui.presentation.history.HistoryImageViewModel
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
 import org.koin.androidx.compose.koinViewModel
 import kotlin.coroutines.resume
@@ -50,13 +53,15 @@ import kotlin.coroutines.suspendCoroutine
 @Composable
 fun CameraPreview(
    viewModel: TextRecognizerViewModel = koinViewModel(),
-   translationViewModel : TranslationViewModel = koinViewModel()
+   translationViewModel : TranslationViewModel = koinViewModel(),
+   imageViewModel : HistoryImageViewModel = koinViewModel()
 ) {
 
-    val imageText by viewModel.imageText
-    val translatedText by translationViewModel.translationState
+    val imageText by remember {viewModel.imageText}
+    val translatedText by remember {translationViewModel.translationState}
+    val savedImageState by remember {imageViewModel.savedImageState}
 
-    val currentText by translationViewModel.currentText
+    val currentText by remember{translationViewModel.currentText}
 
     val lensFacing = CameraSelector.LENS_FACING_BACK
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -97,6 +102,7 @@ fun CameraPreview(
                         context,
                         onSuccess = { uri ->
                             viewModel.recognizeImage(context, uri)
+                            imageViewModel.saveImage(context, uri)
                         },
                         onError = {
                             Toast.makeText(
@@ -131,7 +137,6 @@ fun CameraPreview(
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-
             when (imageText) {
                 is ImageTextUiState.Error -> {
                     val error = (imageText as ImageTextUiState.Error).message
@@ -176,6 +181,23 @@ fun CameraPreview(
                     }
                 }
 
+        }
+
+        when (savedImageState) {
+            is UiState.Error -> {
+                val error = (savedImageState as UiState.Error).message
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            }
+            UiState.Idle -> {
+
+            }
+            UiState.Loading -> {
+
+            }
+            is UiState.Success -> {
+                val data = (savedImageState as UiState.Success<String>).data
+                Toast.makeText(context, data, Toast.LENGTH_LONG).show()
+            }
         }
     }
 

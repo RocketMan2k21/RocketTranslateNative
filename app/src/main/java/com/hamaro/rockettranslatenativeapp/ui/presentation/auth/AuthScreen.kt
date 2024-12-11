@@ -116,17 +116,18 @@ fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (isProcessing) {
-                CircularProgressIndicator()
-            } else {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp), onClick = onSignInClick
-                ) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp), onClick = onSignInClick
+            ) {
+                if (isProcessing) {
+                    CircularProgressIndicator()
+                } else {
                     Text("SIGN IN")
                 }
             }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 

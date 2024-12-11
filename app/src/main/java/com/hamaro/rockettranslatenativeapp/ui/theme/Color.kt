@@ -16,3 +16,8 @@ val onPrimaryTextColor : Color
     @Composable
     get() = if(!isSystemInDarkTheme()) Color.White
         else Color.White
+
+val cameraPreviewIconColor : Color
+    get() = Color.White
+
+
