@@ -60,4 +60,8 @@ class ImageUtils {
     }
 }
 
+fun String.decodeBase64ToByteArray(): ByteArray {
+    return Base64.decode(this, Base64.DEFAULT) // Decode base64 string to byte array
+}
+
 fun ByteArray.toImageBitmap() = BitmapFactory.decodeByteArray(this, 0, size).asImageBitmap()

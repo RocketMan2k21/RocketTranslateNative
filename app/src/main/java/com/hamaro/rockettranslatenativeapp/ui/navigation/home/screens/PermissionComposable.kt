@@ -8,14 +8,13 @@ import com.hamaro.rockettranslatenativeapp.ui.navigation.route.HomeDestination
 import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.CameraPermission
 
 fun NavGraphBuilder.permissionComposable(
-    navigateToCameraPreview: () -> Unit
+    navigateToCameraPreview: () -> Unit,
 ) {
     composable(
         route = HomeDestination.Permission.route
     ) {
         CameraPermission(
-            onPermissionGranted = navigateToCameraPreview
+            onPermissionGranted = navigateToCameraPreview,
         )
     }
-
 }

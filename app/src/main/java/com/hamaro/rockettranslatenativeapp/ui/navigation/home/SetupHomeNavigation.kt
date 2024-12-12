@@ -24,11 +24,11 @@ fun SetupHomeNavigation(
         startDestination = startDestination.route
     ) {
         permissionComposable (
-           navigateToCameraPreview =  screens.cameraPreview
+           navigateToCameraPreview =  screens.cameraPreview,
         )
-        cameraPreviewComposable {
-
-        }
+        cameraPreviewComposable(
+            navigateToPhotoHistory = screens.history
+        )
         historyComposable(
             navigateBack = screens.navigateBack,
             onImageClick = {}

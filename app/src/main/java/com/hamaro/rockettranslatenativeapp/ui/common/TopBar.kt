@@ -1,6 +1,7 @@
 package com.hamaro.rockettranslatenativeapp.ui.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,18 +21,21 @@ import com.hamaro.rockettranslatenativeapp.ui.theme.Typography
 
 @Composable
 fun CustomTopBarWithReturn(
+    modifier: Modifier = Modifier,
     title : String,
     onClickBack : () -> Unit,
 ) {
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .background(color = MaterialTheme.colorScheme.background)
             .fillMaxWidth()
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
+            modifier = Modifier
+                .clickable { onClickBack() },
             imageVector = Icons.AutoMirrored.Default.ArrowBack,
             contentDescription = null
         )

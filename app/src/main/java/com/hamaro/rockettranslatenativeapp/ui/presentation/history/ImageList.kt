@@ -1,5 +1,6 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.history
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hamaro.rockettranslatenativeapp.domain.model.ImageFirestore
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
+import com.roman_duda.rockettranslateapp.utils.decodeBase64ToByteArray
 import com.roman_duda.rockettranslateapp.utils.toImageBitmap
 
 @Composable
@@ -60,8 +62,11 @@ fun ImageItem(modifier: Modifier = Modifier, image: ImageFirestore) {
         modifier = modifier
     ) {
 
+        Log.d("Debug", "does image has image: ${image.imageBaseEncoded.isNotBlank()}")
+        Log.d("Debug", image.createdAt)
+
         Image(
-            bitmap = image.imageBaseEncoded.encodeToByteArray().toImageBitmap(),
+            bitmap = image.imageBaseEncoded.decodeBase64ToByteArray().toImageBitmap(),
             contentDescription = "My image",
             contentScale = ContentScale.Crop
         )

@@ -8,7 +8,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,32 +19,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.hamaro.rockettranslatenativeapp.R
 import com.hamaro.rockettranslatenativeapp.data.CameraCaptureService
 import com.hamaro.rockettranslatenativeapp.domain.model.TargetLanguage
 import com.hamaro.rockettranslatenativeapp.domain.model.UiState
-import com.hamaro.rockettranslatenativeapp.ui.presentation.history.HistoryImageViewModel
+import com.hamaro.rockettranslatenativeapp.ui.presentation.history.ImageViewModel
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
 import org.koin.androidx.compose.koinViewModel
 import kotlin.coroutines.resume
@@ -52,9 +49,10 @@ import kotlin.coroutines.suspendCoroutine
 
 @Composable
 fun CameraPreview(
-   viewModel: TextRecognizerViewModel = koinViewModel(),
-   translationViewModel : TranslationViewModel = koinViewModel(),
-   imageViewModel : HistoryImageViewModel = koinViewModel()
+    viewModel: TextRecognizerViewModel = koinViewModel(),
+    translationViewModel : TranslationViewModel = koinViewModel(),
+    imageViewModel : ImageViewModel = koinViewModel(),
+    navigateToPhotoHistory : () -> Unit
 ) {
 
     val imageText by remember {viewModel.imageText}
@@ -85,6 +83,15 @@ fun CameraPreview(
         .fillMaxSize()
         ) {
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
+
+        Icon(
+            modifier = Modifier
+                .padding(16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
+                .clickable { navigateToPhotoHistory() },
+            painter = painterResource(R.drawable.baseline_history_24),
+            tint = Color.White,
+            contentDescription = ""
+        )
 
         Row(
             modifier = Modifier

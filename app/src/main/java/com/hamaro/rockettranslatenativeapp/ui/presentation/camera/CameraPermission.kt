@@ -14,7 +14,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraPermission(
-    onPermissionGranted : () -> Unit
+    onPermissionGranted : () -> Unit,
 ) {
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
 

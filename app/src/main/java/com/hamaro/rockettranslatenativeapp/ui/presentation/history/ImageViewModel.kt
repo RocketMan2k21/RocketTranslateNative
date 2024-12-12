@@ -9,21 +9,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hamaro.rockettranslatenativeapp.data.remote.model.ImageRequest
 import com.hamaro.rockettranslatenativeapp.domain.ImageRepository
-import com.hamaro.rockettranslatenativeapp.domain.base.BaseViewModel
 import com.hamaro.rockettranslatenativeapp.domain.model.ImageFirestore
+import com.hamaro.rockettranslatenativeapp.domain.model.RequestState
 import com.hamaro.rockettranslatenativeapp.domain.model.UiState
 import com.roman_duda.rockettranslateapp.utils.ImageUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class HistoryImageViewModel(
+class ImageViewModel(
     private val imageRepository: ImageRepository
 ) : ViewModel(){
 
-    private val _images: MutableState<UiState<List<ImageFirestore>>> = mutableStateOf(UiState.Idle)
-    var images : State<UiState<List<ImageFirestore>>> = _images
+    private val _images: MutableStateFlow<UiState<List<ImageFirestore>>> = MutableStateFlow(UiState.Idle)
+    var images : StateFlow<UiState<List<ImageFirestore>>> = _images.asStateFlow()
 
     var savedImageState : MutableState<UiState<String>> = mutableStateOf(UiState.Idle)
         private set
@@ -35,18 +38,25 @@ class HistoryImageViewModel(
     private fun fetchImages() {
         try {
             viewModelScope.launch {
-                _images.value = UiState.Loading
-                val result = imageRepository.getAllImages()
-
-                if (result.isSuccess()) {
-                    val allImages = result.getSuccessData().images
-                    if (allImages.isNotEmpty())
-                        _images.value = UiState.Success(allImages)
-                    else
-                        _images.value = UiState.Error("You don't have image history yet")
-                } else {
-                    _images.value = UiState.Error("Error while fetching image history, please try again later")
-                }
+                imageRepository.getAllImages()
+                    .collect { images ->
+                        when(images) {
+                            is RequestState.Error -> {
+                                _images.value = UiState.Error(images.message)
+                            }
+                            RequestState.Idle -> {}
+                            RequestState.Loading -> {
+                                _images.value = UiState.Loading
+                            }
+                            is RequestState.Success -> {
+                                val allImages = images.data.images
+                                if (allImages.isNotEmpty())
+                                    _images.value = UiState.Success(allImages)
+                                else
+                                    _images.value = UiState.Error("You don't have image history yet")
+                            }
+                        }
+                    }
             }
         } catch (e: Exception) {
             _images.value = UiState.Error(e.message ?: "Error while fetching image history, please try again later")

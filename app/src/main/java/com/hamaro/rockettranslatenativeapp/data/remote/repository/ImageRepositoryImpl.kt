@@ -7,6 +7,8 @@ import com.hamaro.rockettranslatenativeapp.data.remote.model.ImageRequest
 import com.hamaro.rockettranslatenativeapp.domain.model.ImageFirestore
 import com.hamaro.rockettranslatenativeapp.domain.model.ImageHistory
 import com.hamaro.rockettranslatenativeapp.domain.model.RequestState
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 
 class ImageRepositoryImpl(
@@ -44,27 +46,30 @@ class ImageRepositoryImpl(
         }
     }
 
-    override suspend fun getAllImages(): RequestState<ImageHistory> {
-        return try {
-            val userId = getCurrentUserId()
-            val userDocRef = firestore.collection(usersCollection).document(userId)
-            val imageCollectionRef = userDocRef.collection(imagesCollection)
+    override suspend fun getAllImages(): Flow<RequestState<ImageHistory>> {
+        return flow {
+            emit(RequestState.Loading)
+            try {
+                val userId = getCurrentUserId()
+                val userDocRef = firestore.collection(usersCollection).document(userId)
+                val imageCollectionRef = userDocRef.collection(imagesCollection)
 
-            val snapshot = imageCollectionRef.get().await()
+                val snapshot = imageCollectionRef.get().await()
 
-            if (snapshot.isEmpty) {
-                RequestState.Error("No images found for the user.")
-            } else {
-                val images = snapshot.documents.map { doc ->
-                    ImageFirestore(
-                        imageBaseEncoded = doc.getString("base64") ?: "",
-                        createdAt = doc.getString("date_time_captured") ?: ""
-                    )
+                if (snapshot.isEmpty) {
+                    emit(RequestState.Error("No images found for the user."))
+                } else {
+                    val images = snapshot.documents.map { doc ->
+                        ImageFirestore(
+                            imageBaseEncoded = doc.getString("base64") ?: "",
+                            createdAt = doc.getString("date_time_captured") ?: ""
+                        )
+                    }
+                    emit(RequestState.Success(ImageHistory(images)))
                 }
-                RequestState.Success(ImageHistory(images))
+            } catch (e: Exception) {
+                emit(RequestState.Error(e.message ?: "Failed to retrieve images"))
             }
-        } catch (e: Exception) {
-            RequestState.Error(e.message ?: "Failed to retrieve images")
         }
     }
 

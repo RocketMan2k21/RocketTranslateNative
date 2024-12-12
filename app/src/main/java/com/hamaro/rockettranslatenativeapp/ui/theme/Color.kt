@@ -14,7 +14,7 @@ val Pink40 = Color(0xFF7D5260)
 
 val onPrimaryTextColor : Color
     @Composable
-    get() = if(!isSystemInDarkTheme()) Color.White
+    get() = if(!isSystemInDarkTheme()) Color.Black
         else Color.White
 
 val cameraPreviewIconColor : Color
