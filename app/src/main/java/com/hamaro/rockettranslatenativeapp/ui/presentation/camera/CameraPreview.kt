@@ -1,6 +1,7 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.camera
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -41,8 +42,10 @@ import com.hamaro.rockettranslatenativeapp.R
 import com.hamaro.rockettranslatenativeapp.data.CameraCaptureService
 import com.hamaro.rockettranslatenativeapp.domain.model.TargetLanguage
 import com.hamaro.rockettranslatenativeapp.domain.model.UiState
+import com.hamaro.rockettranslatenativeapp.ui.common.SharedViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.history.ImageViewModel
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
+import com.roman_duda.rockettranslateapp.utils.ImageUtils
 import org.koin.androidx.compose.koinViewModel
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -108,8 +111,11 @@ fun CameraPreview(
                         imageCapture,
                         context,
                         onSuccess = { uri ->
-                            viewModel.recognizeImage(context, uri)
-                            imageViewModel.saveImage(context, uri)
+                            val uriToBitmap = ImageUtils.uriToBitmap(context, uri)
+                            uriToBitmap?.let {
+                                viewModel.recognizeImage(it)
+                                imageViewModel.saveImage(context, uri)
+                            }
                         },
                         onError = {
                             Toast.makeText(

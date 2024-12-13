@@ -3,6 +3,7 @@ package com.roman_duda.rockettranslateapp.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.provider.MediaStore
 import android.util.Base64
 import androidx.compose.ui.graphics.asImageBitmap
 import java.io.ByteArrayOutputStream
@@ -56,6 +57,9 @@ class ImageUtils {
                 null
             }
         }
+
+        fun uriToBitmap(context : Context, uri : Uri1): Bitmap? =
+            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
 
     }
 }

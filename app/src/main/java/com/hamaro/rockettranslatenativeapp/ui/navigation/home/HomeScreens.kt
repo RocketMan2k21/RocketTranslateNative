@@ -16,6 +16,10 @@ class HomeScreens(navController: NavHostController) {
         navController.navigate(HomeDestination.History.route)
     }
 
+    val image : () -> Unit = {
+        navController.navigate("${HomeDestination.Image}")
+    }
+
     val navigateBack : () -> Unit = {
         navController.popBackStack()
     }

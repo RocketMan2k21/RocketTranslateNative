@@ -11,6 +11,7 @@ import com.hamaro.rockettranslatenativeapp.domain.ImageRepository
 import com.hamaro.rockettranslatenativeapp.domain.TextRecognizer
 import com.hamaro.rockettranslatenativeapp.domain.TextTranslationService
 import com.hamaro.rockettranslatenativeapp.domain.TranslationApiRepository
+import com.hamaro.rockettranslatenativeapp.ui.common.SharedViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.auth.AuthViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.TextRecognizerViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.TranslationViewModel
@@ -30,6 +31,7 @@ val appModule = module {
     factory { TextRecognizerViewModel(textRecognizer = get()) }
     factory { TranslationViewModel(translationService = get()) }
     factory { ImageViewModel(imageRepository = get()) }
+    factory { SharedViewModel() }
 }
 
 fun initializeKoin() {

@@ -33,7 +33,7 @@ import com.roman_duda.rockettranslateapp.utils.toImageBitmap
 fun GridContent(
     modifier: Modifier = Modifier,
     images : List<ImageFirestore>,
-    onImageClick : () -> Unit
+    onImageClick : (String) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 150.dp),
@@ -48,7 +48,9 @@ fun GridContent(
                 modifier = Modifier
                     .padding(8.dp)
                     .clickable {
-                        onImageClick()
+                        onImageClick(
+                            image.imageBaseEncoded
+                        )
                     },
                 image = image,
             )

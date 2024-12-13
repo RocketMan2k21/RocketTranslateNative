@@ -93,6 +93,8 @@ class ImageViewModel(
         }
     }
 
+
+
     fun getCurrentDateFormatted(): String {
         // Get current date
         val currentDate = LocalDate.now()

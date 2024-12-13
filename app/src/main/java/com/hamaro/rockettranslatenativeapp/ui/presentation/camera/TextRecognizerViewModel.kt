@@ -2,8 +2,6 @@ package com.hamaro.rockettranslatenativeapp.ui.presentation.camera
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
-import android.provider.MediaStore
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -20,19 +18,18 @@ class TextRecognizerViewModel(
     private val _imageText: MutableState<ImageTextUiState> = mutableStateOf(ImageTextUiState.Idle)
     val imageText: State<ImageTextUiState> = _imageText
 
-    fun recognizeImage(context: Context, uri: Uri) {
+    fun recognizeImage(bitMap: Bitmap) {
         _imageText.value = ImageTextUiState.Loading
 
-        val bitmap: Bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-        ImageUtils.scaleBitmapDown(
-            bitmap,
+        val scaledBitMap = ImageUtils.scaleBitmapDown(
+            bitMap,
             maxDimension = 640
         )
 
         try {
             viewModelScope.launch {
                 val result = textRecognizer
-                    .recognizeText(bitmap)
+                    .recognizeText(scaledBitMap)
 
                 if (!result.isError())
                     _imageText.value = ImageTextUiState.Success(result.getSuccessData())

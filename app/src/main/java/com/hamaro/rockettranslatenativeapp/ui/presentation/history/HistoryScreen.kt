@@ -24,7 +24,7 @@ import org.koin.androidx.compose.koinViewModel
 fun HistoryImageScreen(
     viewModel: ImageViewModel = koinViewModel(),
     navigateToHomeScreen: () -> Unit,
-    onImageClick: () -> Unit
+    onImageClick: (String) -> Unit
 ) {
     val images by viewModel.images.collectAsState()
 
