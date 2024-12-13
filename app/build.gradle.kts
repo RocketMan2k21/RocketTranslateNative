@@ -19,6 +19,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "TRANSLATION_API_KEY", "\"${project.findProperty("TRANSLATION_API_KEY") ?: ""}\"")
     }
 
     buildTypes {
@@ -28,6 +30,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
         }
     }
     compileOptions {
@@ -39,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        android.buildFeatures.buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -60,10 +64,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
@@ -88,5 +93,20 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     implementation (libs.koin.androidx.compose)
+
+    implementation (libs.google.accompanist.permissions)
+
+    implementation ("com.deepl.api:deepl-java:1.7.0")
+
+    implementation ("com.google.guava:guava:33.3.1-android")
+
+    implementation ("com.google.mlkit:text-recognition:16.0.1")
+
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+
+    implementation ("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    implementation(libs.coil.compose)
+
 
 }

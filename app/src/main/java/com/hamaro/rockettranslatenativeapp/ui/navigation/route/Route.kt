@@ -1,10 +1,12 @@
 package com.hamaro.rockettranslatenativeapp.ui.navigation.route
 
-class Route {
+sealed class HomeDestination(val route : String){
+    data object Permission : HomeDestination("permission")
+    data object Camera : HomeDestination("camera")
+    data object History : HomeDestination("history")
+    data object Image : HomeDestination("image")
+
     companion object {
-         const val auth = "auth"
-         const val auth_signIn = "auth/sign_in"
-         const val camera = "camera"
-         const val camera_history = "history"
+        const val IMAGE_ARGUMENT_KEY = "base64"
     }
 }

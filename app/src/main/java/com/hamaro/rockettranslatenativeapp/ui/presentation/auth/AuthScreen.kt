@@ -1,5 +1,6 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.auth
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -115,22 +116,28 @@ fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (isProcessing) {
-                CircularProgressIndicator()
-            } else {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp), onClick = onSignInClick
-                ) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp), onClick = onSignInClick
+            ) {
+                if (isProcessing) {
+                    CircularProgressIndicator()
+                } else {
                     Text("SIGN IN")
                 }
             }
 
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            LaunchedEffect(currentUser != null && !currentUser.isAnonymous) {
-                onSignIn()
+            LaunchedEffect(currentUser) {
+                Log.d("AuthScreen", "Try to sign in")
+
+                if (currentUser != null && !currentUser.isAnonymous) {
+                    Log.d("AuthScreen", "Logging in...")
+                    //onSignIn()
+                }
             }
 
             AnimatedVisibility(isError) {
