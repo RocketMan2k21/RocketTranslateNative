@@ -76,6 +76,7 @@ fun ImageScreen(
                 .padding(paddingValues)
         ) {
 
+            Log.d("Debug", "imageBase64 is not empty : ${imageBase64.isNotBlank()}")
             Image(
                 bitmap = imageBase64.decodeBase64ToByteArray().toImageBitmap(),
                 contentDescription = "My image",

@@ -7,12 +7,14 @@ import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.CameraPreview
 
 fun NavGraphBuilder.cameraPreviewComposable(
     navigateToPhotoHistory : () -> Unit,
+    navigateToPhoto : (String) -> Unit,
 ) {
     composable(
         route = HomeDestination.Camera.route
     ) {
         CameraPreview(
-            navigateToPhotoHistory = navigateToPhotoHistory
+            navigateToPhotoHistory = navigateToPhotoHistory,
+            navigateToPhoto = navigateToPhoto
         )
     }
 }

@@ -31,7 +31,11 @@ fun SetupHomeNavigation(
            navigateToCameraPreview =  screens.cameraPreview,
         )
         cameraPreviewComposable(
-            navigateToPhotoHistory = screens.history
+            navigateToPhotoHistory = screens.history,
+            navigateToPhoto = { base64 ->
+                sharedViewModel.setBase64Image(base64)
+                screens.image()
+            }
         )
         historyComposable(
             navigateBack = screens.navigateBack,
