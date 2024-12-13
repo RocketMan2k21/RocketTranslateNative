@@ -53,6 +53,7 @@ import com.hamaro.rockettranslatenativeapp.R
 import com.hamaro.rockettranslatenativeapp.data.CameraCaptureService
 import com.hamaro.rockettranslatenativeapp.domain.model.TargetLanguage
 import com.hamaro.rockettranslatenativeapp.domain.model.UiState
+import com.hamaro.rockettranslatenativeapp.ui.common.FeedbackIconButton
 import com.hamaro.rockettranslatenativeapp.ui.common.SharedViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.history.ImageViewModel
 import com.hamaro.rockettranslatenativeapp.ui.theme.cameraPreviewIconColor
@@ -115,6 +116,11 @@ fun CameraPreview(
         .fillMaxSize()
         ) {
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
+
+        FeedbackIconButton(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+        )
 
         Icon(
             modifier = Modifier
