@@ -1,8 +1,15 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.camera
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
+import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
@@ -21,14 +28,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,8 +55,10 @@ import com.hamaro.rockettranslatenativeapp.domain.model.TargetLanguage
 import com.hamaro.rockettranslatenativeapp.domain.model.UiState
 import com.hamaro.rockettranslatenativeapp.ui.common.SharedViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.history.ImageViewModel
+import com.hamaro.rockettranslatenativeapp.ui.theme.cameraPreviewIconColor
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
 import com.roman_duda.rockettranslateapp.utils.ImageUtils
+import kotlinx.coroutines.selects.select
 import org.koin.androidx.compose.koinViewModel
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -55,7 +68,8 @@ fun CameraPreview(
     viewModel: TextRecognizerViewModel = koinViewModel(),
     translationViewModel : TranslationViewModel = koinViewModel(),
     imageViewModel : ImageViewModel = koinViewModel(),
-    navigateToPhotoHistory : () -> Unit
+    navigateToPhotoHistory : () -> Unit,
+    navigateToPhoto : (String) -> Unit
 ) {
 
     val imageText by remember {viewModel.imageText}
@@ -76,6 +90,21 @@ fun CameraPreview(
         ImageCapture.Builder().build()
     }
 
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            val selectedImageUri = data?.data
+            selectedImageUri?.let {
+                val uriToBase64 = ImageUtils.uriToBase64(context, it)
+                uriToBase64?.let { base64 ->
+                    navigateToPhoto(base64)
+                }
+            }
+        }
+    }
+
     LaunchedEffect(lensFacing) {
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
@@ -89,6 +118,7 @@ fun CameraPreview(
 
         Icon(
             modifier = Modifier
+                .align(Alignment.TopEnd)
                 .padding(16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
                 .clickable { navigateToPhotoHistory() },
             painter = painterResource(R.drawable.baseline_history_24),
@@ -139,6 +169,19 @@ fun CameraPreview(
                 enabled = currentText.isNotBlank()
             ) {
                 Text(text = "Translate text")
+            }
+
+            IconButton(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    galleryLauncher.launch(intent)
+                }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.baseline_photo_library_24),
+                    tint = cameraPreviewIconColor,
+                    contentDescription = "galleryPick"
+                )
             }
         }
     }
