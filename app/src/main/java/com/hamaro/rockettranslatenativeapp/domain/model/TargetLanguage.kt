@@ -6,8 +6,7 @@ enum class TargetLanguage(val lang : String) {
     FR("FR")
 }
 
-val languageHashMap = hashMapOf(
-    TargetLanguage.EN to "English",
-    TargetLanguage.DE to "German",
-    TargetLanguage.FR to "French"
-)
+enum class LanguageType(val type : String) {
+    SOURCE("source"),
+    TARGET("target")
+}

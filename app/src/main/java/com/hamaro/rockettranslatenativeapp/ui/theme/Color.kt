@@ -29,4 +29,13 @@ val textCameraColor : Color
     get() = if(!isSystemInDarkTheme()) Color.White
     else Color.White
 
+val backgroundColor : Color
+    @Composable
+    get() = if(!isSystemInDarkTheme()) Color.White
+    else grayBlack
 
+val borderStrokeColor : Color
+    @Composable
+    get() = if(isSystemInDarkTheme()) Color.White
+    else grayBlack
+val grayBlack = Color(0xff495057)

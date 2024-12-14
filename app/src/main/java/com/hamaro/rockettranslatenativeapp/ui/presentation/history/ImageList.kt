@@ -1,6 +1,7 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.history
 
 import android.util.Log
+import android.view.Surface
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,6 +30,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hamaro.rockettranslatenativeapp.domain.model.ImageFirestore
+import com.hamaro.rockettranslatenativeapp.ui.theme.Typography
+import com.hamaro.rockettranslatenativeapp.ui.theme.backgroundColor
+import com.hamaro.rockettranslatenativeapp.ui.theme.borderStrokeColor
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
 import com.roman_duda.rockettranslateapp.utils.ImageUtils
 import com.roman_duda.rockettranslateapp.utils.decodeBase64ToByteArray
@@ -65,6 +71,7 @@ fun GridContent(
 fun ImageItem(modifier: Modifier = Modifier, image: ImageFirestore) {
     Column (
         modifier = modifier
+
     ) {
 
         Log.d("Debug", "does image has image: ${image.imageBaseEncoded.isNotBlank()}")
@@ -75,6 +82,9 @@ fun ImageItem(modifier: Modifier = Modifier, image: ImageFirestore) {
         val imageBitmap = rotatedBitmap.asImageBitmap()
 
         Image(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .height(200.dp),
             bitmap = imageBitmap,
             contentDescription = "My image",
             contentScale = ContentScale.Crop
@@ -84,10 +94,13 @@ fun ImageItem(modifier: Modifier = Modifier, image: ImageFirestore) {
             modifier = Modifier
                 .padding(top = 8.dp),
             text = image.createdAt,
-            color = onPrimaryTextColor
+            color = borderStrokeColor,
+            style = Typography.labelLarge
         )
+        }
+
+
     }
-}
 
 @Preview
 @Composable
