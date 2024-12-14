@@ -20,12 +20,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hamaro.rockettranslatenativeapp.domain.model.ImageFirestore
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
+import com.roman_duda.rockettranslateapp.utils.ImageUtils
 import com.roman_duda.rockettranslateapp.utils.decodeBase64ToByteArray
 import com.roman_duda.rockettranslateapp.utils.toImageBitmap
 
@@ -67,8 +70,12 @@ fun ImageItem(modifier: Modifier = Modifier, image: ImageFirestore) {
         Log.d("Debug", "does image has image: ${image.imageBaseEncoded.isNotBlank()}")
         Log.d("Debug", image.createdAt)
 
+        val bitmap = image.imageBaseEncoded.decodeBase64ToByteArray().toImageBitmap()
+        val rotatedBitmap = ImageUtils.rotateBitmapIfNeeded(bitmap.asAndroidBitmap())
+        val imageBitmap = rotatedBitmap.asImageBitmap()
+
         Image(
-            bitmap = image.imageBaseEncoded.decodeBase64ToByteArray().toImageBitmap(),
+            bitmap = imageBitmap,
             contentDescription = "My image",
             contentScale = ContentScale.Crop
         )

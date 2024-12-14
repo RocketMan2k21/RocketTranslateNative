@@ -1,5 +1,6 @@
 package com.hamaro.rockettranslatenativeapp.ui.theme
 
+import android.graphics.Color.parseColor
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -19,5 +20,13 @@ val onPrimaryTextColor : Color
 
 val cameraPreviewIconColor : Color
     get() = Color.White
+
+val backGroundForCameraPreviewBounds : Color
+    get() =  Color(0x80000000)
+
+val textCameraColor : Color
+    @Composable
+    get() = if(!isSystemInDarkTheme()) Color.White
+    else Color.White
 
 

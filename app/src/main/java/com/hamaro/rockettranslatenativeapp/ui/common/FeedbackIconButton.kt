@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -21,10 +22,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.hamaro.rockettranslatenativeapp.ui.theme.cameraPreviewIconColor
 
 @Composable
 fun FeedbackIconButton(
-    modifier : Modifier = Modifier
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
@@ -33,11 +35,16 @@ fun FeedbackIconButton(
 
     Box(
         modifier = modifier
-            .padding(16.dp)
     ) {
         // Icon Button
         IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
+            Icon(
+                modifier = Modifier
+                    .size(30.dp),
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = "Menu",
+                tint = cameraPreviewIconColor
+            )
         }
 
         // Dropdown Menu

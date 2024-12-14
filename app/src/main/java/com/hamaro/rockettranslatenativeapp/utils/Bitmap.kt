@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory
 import android.provider.MediaStore
 import android.util.Base64
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.exifinterface.media.ExifInterface
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -61,6 +63,35 @@ class ImageUtils {
         fun uriToBitmap(context : Context, uri : Uri1): Bitmap? =
             MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
 
+        fun rotateBitmapIfNeeded(bitmap: Bitmap): Bitmap {
+            // Convert Bitmap to ByteArrayInputStream
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+            val byteArray = byteArrayOutputStream.toByteArray()
+
+            // Create ExifInterface from the ByteArrayInputStream
+            val inputStream = ByteArrayInputStream(byteArray)
+            val exifInterface = ExifInterface(inputStream)
+
+            // Get the orientation from EXIF data
+            val orientation = exifInterface.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+
+            // Use Matrix to rotate Bitmap if needed
+            val matrix = android.graphics.Matrix()
+            when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                ExifInterface.ORIENTATION_NORMAL -> {}
+            }
+            matrix.postRotate(90f)
+
+            // Return the rotated Bitmap
+            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        }
     }
 }
 

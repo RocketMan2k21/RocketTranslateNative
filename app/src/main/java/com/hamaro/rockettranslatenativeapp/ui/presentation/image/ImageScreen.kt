@@ -1,9 +1,12 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.image
 
 import android.util.Log
+import android.view.Surface
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,9 +17,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +32,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -43,7 +52,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ImageScreen(
-    imageBase64 : String,
+    imageBase64: String,
     translationViewModel: TranslationViewModel = koinViewModel(),
     textRecognizerViewModel: TextRecognizerViewModel = koinViewModel(),
     navigateHome: () -> Unit
@@ -58,94 +67,102 @@ fun ImageScreen(
     Log.d("Debug", "current image: ${imageBase64.isNotBlank()}")
 
     LaunchedEffect(Unit) {
-        textRecognizerViewModel.recognizeImage(imageBase64.decodeBase64ToByteArray().toImageBitmap().asAndroidBitmap())
+        textRecognizerViewModel.recognizeImage(
+            imageBase64.decodeBase64ToByteArray().toImageBitmap().asAndroidBitmap()
+        )
     }
 
-    Scaffold(
-        topBar = {
-            CustomTopBarWithReturn(
-                modifier = Modifier.padding(WindowInsets.statusBars.asPaddingValues().calculateTopPadding()),
-                title = "",
-                onClickBack = navigateHome
-            )
-        }
-    ) { paddingValues ->
-        Column(
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
+    ) {
+        val bitmap = imageBase64.decodeBase64ToByteArray().toImageBitmap()
+        val rotatedBitmap = ImageUtils.rotateBitmapIfNeeded(bitmap.asAndroidBitmap())
+        val imageBitmap = rotatedBitmap.asImageBitmap()
+
+        Log.d("Debug", "imageBase64 is not empty : ${imageBase64.isNotBlank()}")
+
+
+        Image(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+                .fillMaxWidth(),
+            bitmap = imageBitmap,
+            contentDescription = "My image",
+            contentScale = ContentScale.Crop
+        )
 
-            Log.d("Debug", "imageBase64 is not empty : ${imageBase64.isNotBlank()}")
-            Image(
-                bitmap = imageBase64.decodeBase64ToByteArray().toImageBitmap(),
-                contentDescription = "My image",
-                contentScale = ContentScale.Crop
-            )
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
 
-            when (imageTextState) {
-                is ImageTextUiState.Error -> {
-                    val error = (imageTextState as ImageTextUiState.Error).message
-                    Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-                }
-                ImageTextUiState.Idle -> Unit
-                ImageTextUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-                is ImageTextUiState.Success -> {
-                    val recognizedText = (imageTextState as ImageTextUiState.Success).text
-                    translationViewModel.updateCurrentText(recognizedText)
-                    AnimatedContent(targetState = recognizedText, label = "") { text ->
-                        Text(text = text, color = onPrimaryTextColor)
-                    }
-                }
+        when (imageTextState) {
+            is ImageTextUiState.Error -> {
+                val error = (imageTextState as ImageTextUiState.Error).message
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Handle Translation State
-            when (translationState) {
-                is TranslationUiState.Error -> {
-                    val error = (translationState as TranslationUiState.Error).message
-                    Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-                }
-                TranslationUiState.Idle -> Unit
-                TranslationUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-                is TranslationUiState.Success -> {
-                    val translatedText = (translationState as TranslationUiState.Success).text
-                    AnimatedContent(targetState = translatedText, label = "") { text ->
-                        Text(text = text, color = onPrimaryTextColor)
-                    }
-                }
+            ImageTextUiState.Idle -> Unit
+            ImageTextUiState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Translate Button
-            if (isTextRecognized) {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = 16.dp,
-                            vertical = WindowInsets.navigationBars
-                                .asPaddingValues()
-                                .calculateBottomPadding()
-                        ),
-                    onClick = {
-                        translationViewModel.translateText(
-                            currentText,
-                            targetLanguage = TargetLanguage.DE.lang
-                        )
-                    }
-                ) {
-                    Text(text = "Translate Text")
+            is ImageTextUiState.Success -> {
+                val recognizedText = (imageTextState as ImageTextUiState.Success).text
+                translationViewModel.updateCurrentText(recognizedText)
+                AnimatedContent(targetState = recognizedText, label = "") { text ->
+                    Text(text = text, color = onPrimaryTextColor)
                 }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Handle Translation State
+        when (translationState) {
+            is TranslationUiState.Error -> {
+                val error = (translationState as TranslationUiState.Error).message
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            }
+
+            TranslationUiState.Idle -> Unit
+            TranslationUiState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
+
+            is TranslationUiState.Success -> {
+                val translatedText = (translationState as TranslationUiState.Success).text
+                AnimatedContent(targetState = translatedText, label = "") { text ->
+                    Text(text = text, color = onPrimaryTextColor)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Translate Button
+        if (isTextRecognized) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 16.dp,
+                        vertical = WindowInsets.navigationBars
+                            .asPaddingValues()
+                            .calculateBottomPadding()
+                    ),
+                onClick = {
+                    translationViewModel.translateText(
+                        currentText,
+                        targetLanguage = TargetLanguage.DE.lang
+                    )
+                }
+            ) {
+                Text(text = "Translate Text")
             }
         }
     }
 }
+
+
+
+
