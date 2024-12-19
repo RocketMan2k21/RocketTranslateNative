@@ -74,7 +74,7 @@ class AuthViewModel(
         launchWithCatchingException {
             _isProcessing.value = true
             //val result = authService.createUser(_uiState.value.email, _uiState.value.password)
-            authService.authenticate(_uiState.value.email, _uiState.value.password)
+            authService.authenticate("romahaduda@gmail.com", "romato")
             _isProcessing.value = false
         }
 

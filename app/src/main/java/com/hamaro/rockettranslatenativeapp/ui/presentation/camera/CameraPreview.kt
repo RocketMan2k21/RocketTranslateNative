@@ -133,7 +133,6 @@ fun CameraPreview(
 
         UpperOptionBlock(modifier = Modifier.align(Alignment.TopCenter), navigateToPhotoHistory = navigateToPhotoHistory)
 
-        // IconButton on the left
 
         Box(){
 
@@ -250,12 +249,6 @@ private fun UpperOptionBlock(
                 painter = painterResource(R.drawable.baseline_flash_on_24),
                 tint = Color.White,
                 contentDescription = ""
-            )
-
-            Text(
-                text = "Rocket Lens",
-                style = Typography.headlineMedium,
-                color = textCameraColor
             )
 
             Icon(
