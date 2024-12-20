@@ -3,12 +3,16 @@ package com.hamaro.rockettranslatenativeapp.ui.presentation.auth
 import androidx.lifecycle.viewModelScope
 import com.hamaro.rockettranslatenativeapp.domain.AuthService
 import com.hamaro.rockettranslatenativeapp.domain.base.BaseViewModel
+import com.hamaro.rockettranslatenativeapp.domain.model.UiState
 import com.hamaro.rockettranslatenativeapp.domain.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
@@ -31,12 +35,15 @@ class AuthViewModel(
     private val _isProcessing = MutableStateFlow(false)
     val isProcessing = _isProcessing.asStateFlow()
 
-    private val isButtonEnabled: StateFlow<Boolean> = combine(uiState) { states ->
+    val isButtonEnabled: StateFlow<Boolean> = combine(uiState) { states ->
         val state = states.first()
         state.email.isNotBlank() && state.password.isNotBlank()
     }.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), false
     )
+
+    private val _authState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val authState: StateFlow<UiState<Unit>> = _authState.asStateFlow()
 
     init {
         launchWithCatchingException {
@@ -45,22 +52,30 @@ class AuthViewModel(
             }
         }
 
+        launchWithCatchingException {
+            authService.authExceptionFlow
+                .filterNot { it.isEmpty() }
+                .collect{ errorMessage ->
+                    _isProcessing.value = false
+                    _authState.value = UiState.Error(errorMessage)
+                }
+        }
     }
 
     fun onEmailChange(newValue: String) {
-        _uiState.update { it.copy(email = newValue) }
+        _uiState.update { it.copy(email = newValue.trim()) }
         //reset error
         if (newValue.isNotBlank()) _emailError.value = false
     }
 
     fun onPasswordChange(newValue: String) {
-        _uiState.update { it.copy(password = newValue) }
+        _uiState.update { it.copy(password = newValue.trim()) }
         //reset error
         if (newValue.isNotBlank()) _passwordError.value = false
     }
 
     fun onSignInClick() {
-
+        _authState.value = UiState.Idle
         if (_uiState.value.email.isEmpty()) {
             _emailError.value = true
             return
@@ -71,13 +86,15 @@ class AuthViewModel(
             return
         }
 
+        _isProcessing.value = true
         launchWithCatchingException {
-            _isProcessing.value = true
-            //val result = authService.createUser(_uiState.value.email, _uiState.value.password)
-            authService.authenticate("romahaduda@gmail.com", "romato")
-            _isProcessing.value = false
+            try {
+                authService.authenticate(_uiState.value.email, _uiState.value.password)
+                _isProcessing.value = false
+            } catch (e: Exception) {
+                _isProcessing.value = false
+            }
         }
-
     }
 
     fun onSignOut() {
