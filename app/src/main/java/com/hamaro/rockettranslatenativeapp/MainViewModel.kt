@@ -30,6 +30,7 @@ class MainViewModel(
     sealed class Destination(val route: String) {
         data object Auth : Destination("auth")
         data object Main : Destination("main")
+        data object SignUp : Destination("signup")
     }
 }
 

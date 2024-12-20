@@ -56,6 +56,7 @@ class AuthViewModel(
             authService.authExceptionFlow
                 .filterNot { it.isEmpty() }
                 .collect{ errorMessage ->
+                    println("Auth error msg: $errorMessage")
                     _isProcessing.value = false
                     _authState.value = UiState.Error(errorMessage)
                 }
@@ -100,6 +101,30 @@ class AuthViewModel(
     fun onSignOut() {
         launchWithCatchingException {
             authService.signOut()
+        }
+    }
+
+    fun createNewUserClick () {
+        _authState.value = UiState.Idle
+        if (_uiState.value.email.isEmpty()) {
+            _emailError.value = true
+            return
+        }
+
+        if (_uiState.value.password.isEmpty()) {
+            _passwordError.value = true
+            return
+        }
+
+        _isProcessing.value = true
+
+        launchWithCatchingException {
+            try {
+                authService.createUser(_uiState.value.email, _uiState.value.password)
+                _isProcessing.value = false
+            } catch (e : Exception) {
+                _isProcessing.value = false
+            }
         }
     }
 
