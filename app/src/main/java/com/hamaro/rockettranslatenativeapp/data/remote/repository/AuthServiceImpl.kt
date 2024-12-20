@@ -1,5 +1,7 @@
 package com.hamaro.rockettranslatenativeapp.data.remote.repository
 
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.hamaro.rockettranslatenativeapp.domain.AuthService
@@ -10,6 +12,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 
 class AuthServiceImpl(
@@ -34,6 +38,7 @@ class AuthServiceImpl(
 
         auth.addAuthStateListener(authStateListener)
 
+
         awaitClose { auth.removeAuthStateListener(authStateListener) }
     }
 
@@ -43,7 +48,7 @@ class AuthServiceImpl(
         }.await()
     }
     override suspend fun authenticate(email: String, password: String) {
-        launchWithAwait {
+       launchWithAwait {
             auth.signInWithEmailAndPassword(email, password)
         }
     }

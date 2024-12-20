@@ -28,22 +28,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.mlkit.vision.common.internal.MultiFlavorDetectorCreator.Registration
 import com.hamaro.rockettranslatenativeapp.domain.model.User
 import org.koin.androidx.compose.koinViewModel
 
-
 @Composable
-fun AuthScreen(
-    viewModel: AuthViewModel = koinViewModel(),
+fun RegistrationScreen(
+    viewModel: AuthViewModel,
     onSuccessSignIn : () -> Unit
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
     val emailError by viewModel.emailError.collectAsState()
     val passwordError by viewModel.passwordError.collectAsState()
     val isProcessing by viewModel.isProcessing.collectAsState()
     val isButtonEnabled by viewModel.isButtonEnabled.collectAsState()
     val currentUser by viewModel.currentUser.collectAsState()
+
 
     LoginScreenContent(
         uiState = uiState,
@@ -58,4 +58,3 @@ fun AuthScreen(
         onSignIn = onSuccessSignIn
     )
 }
-

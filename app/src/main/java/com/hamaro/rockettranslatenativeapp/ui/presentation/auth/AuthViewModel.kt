@@ -31,7 +31,7 @@ class AuthViewModel(
     private val _isProcessing = MutableStateFlow(false)
     val isProcessing = _isProcessing.asStateFlow()
 
-    private val isButtonEnabled: StateFlow<Boolean> = combine(uiState) { states ->
+    val isButtonEnabled: StateFlow<Boolean> = combine(uiState) { states ->
         val state = states.first()
         state.email.isNotBlank() && state.password.isNotBlank()
     }.stateIn(
@@ -74,7 +74,7 @@ class AuthViewModel(
         launchWithCatchingException {
             _isProcessing.value = true
             //val result = authService.createUser(_uiState.value.email, _uiState.value.password)
-            authService.authenticate("romahaduda@gmail.com", "romato")
+            authService.authenticate(_uiState.value.email, _uiState.value.password)
             _isProcessing.value = false
         }
 
