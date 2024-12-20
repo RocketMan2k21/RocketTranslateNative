@@ -1,10 +1,12 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.auth
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +30,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hamaro.rockettranslatenativeapp.domain.model.UiState
 import com.hamaro.rockettranslatenativeapp.domain.model.User
 import org.koin.androidx.compose.koinViewModel
 
@@ -44,18 +47,141 @@ fun AuthScreen(
     val isProcessing by viewModel.isProcessing.collectAsState()
     val isButtonEnabled by viewModel.isButtonEnabled.collectAsState()
     val currentUser by viewModel.currentUser.collectAsState()
+    val authState by viewModel.authState.collectAsState()
+
 
     LoginScreenContent(
         uiState = uiState,
-        isButtonEnabled = isButtonEnabled,
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
         onSignInClick = { viewModel.onSignInClick() },
         isProcessing = isProcessing,
         currentUser = currentUser,
-        isError = emailError || passwordError,
+        isButtonEnabled = isButtonEnabled,
+        authErrorState = authState,
+        isPasswordError = passwordError,
+        isEmailError = emailError,
         onSignOut = viewModel::onSignOut,
         onSignIn = onSuccessSignIn
     )
 }
 
+
+@Composable
+fun LoginScreenContent(
+    modifier: Modifier = Modifier,
+    uiState: LoginUiState,
+    authErrorState: UiState<Unit>,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onSignInClick: () -> Unit,
+    isProcessing: Boolean,
+    currentUser: User?,
+    isButtonEnabled : Boolean,
+    isPasswordError: Boolean,
+    isEmailError : Boolean,
+    onSignOut: () -> Unit,
+    onSignIn: () -> Unit,
+) {
+
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+    ) {
+        val width = this.maxWidth
+        val finalModifier = if (width >= 780.dp) modifier.width(400.dp) else modifier.fillMaxWidth()
+        Column(
+            modifier = finalModifier
+                .padding(16.dp)
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Welcome to Rocket Translate App",
+                textAlign = TextAlign.Center,
+                fontSize = 24.sp
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(), value = uiState.email, label = {
+                    Text("Email")
+                }, onValueChange = onEmailChange,
+                isError = isEmailError
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnimatedVisibility(isEmailError) {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                    Text("Invalid email", color = MaterialTheme.colorScheme.error)
+                }
+            }
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = uiState.password,
+                visualTransformation = PasswordVisualTransformation(),
+                label = {
+                    Text("Password")
+                },
+                onValueChange = onPasswordChange,
+                isError = isPasswordError
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnimatedVisibility(isPasswordError) {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                    Text("Invalid password", color = MaterialTheme.colorScheme.error)
+                }
+            }
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp), onClick = onSignInClick,
+                enabled = isButtonEnabled,
+                contentPadding = PaddingValues(4.dp)
+            ) {
+                if (isProcessing) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("SIGN IN")
+                }
+            }
+
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LaunchedEffect(currentUser) {
+                Log.d("AuthScreen", "Try to sign in")
+
+                if (currentUser != null && !currentUser.isAnonymous) {
+                    Log.d("AuthScreen", "Logging in...")
+                    onSignIn()
+                }
+            }
+
+            AnimatedContent(authErrorState, label = "") {
+                when(it) {
+                    is UiState.Error -> {
+                        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                            Text(it.message, color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                    UiState.Idle -> Unit
+                    UiState.Loading -> Unit
+                    is UiState.Success -> Unit
+                }
+            }
+
+        }
+    }
+
+}
