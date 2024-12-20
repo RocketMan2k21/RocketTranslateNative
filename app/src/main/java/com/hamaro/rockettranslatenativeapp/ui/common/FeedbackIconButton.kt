@@ -30,7 +30,7 @@ fun FeedbackIconButton(
 ) {
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
-    val emailAddress = "support@yourapp.com"
+    val emailAddress = "support@rockettranslate.com"
     val emailSubject = "Feedback"
 
     Box(
@@ -62,11 +62,7 @@ fun FeedbackIconButton(
                         putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddress))
                         putExtra(Intent.EXTRA_SUBJECT, emailSubject)
                     }
-                    if (emailIntent.resolveActivity(context.packageManager) != null) {
-                        context.startActivity(emailIntent)
-                    } else {
-                        Toast.makeText(context, "No email app found", Toast.LENGTH_SHORT).show()
-                    }
+                    context.startActivity(emailIntent)
                 }
             )
         }

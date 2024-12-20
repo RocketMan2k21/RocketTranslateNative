@@ -37,6 +37,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
@@ -140,7 +141,7 @@ fun ImageScreen(
             androidx.compose.animation.AnimatedVisibility(isTextRecognized) {
                 TranslateOptions(
                     modifier = Modifier
-                        .padding(WindowInsets.statusBars.asPaddingValues()),
+                        .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 16.dp),
                     availableSourceLanguages = (availableSourceLanguages as? UiState.Success)?.data
                         ?: emptyList(),
                     availableTargetLanguages = (availableTargetLanguages as? UiState.Success)?.data
@@ -188,16 +189,8 @@ fun ImageScreen(
 
         Column(
             Modifier
-
                 .padding(16.dp)
         ) {
-
-                Text(
-                    text = "Recognized text",
-                    style = Typography.headlineMedium
-                )
-
-            Spacer(Modifier.height(6.dp))
 
 
                     AnimatedContent(modifier = Modifier
@@ -205,17 +198,24 @@ fun ImageScreen(
                         when (it) {
                             is ImageTextUiState.Error -> {
                                 val error = (imageTextState as ImageTextUiState.Error).message
-                                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+                                Text(text = error, color = onPrimaryTextColor, fontSize = 18.sp)
                             }
 
                             ImageTextUiState.Idle -> Unit
                             ImageTextUiState.Loading -> Unit
 
                             is ImageTextUiState.Success -> {
-                                val recognizedText =
-                                    (imageTextState as ImageTextUiState.Success).text
-                                translationViewModel.updateCurrentText(recognizedText)
-                                Text(text = recognizedText, color = onPrimaryTextColor, fontSize = 18.sp)
+                                Column {
+                                    Text(
+                                        text = "Recognized text",
+                                        style = Typography.titleLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    val recognizedText =
+                                        (imageTextState as ImageTextUiState.Success).text
+                                    translationViewModel.updateCurrentText(recognizedText)
+                                    Text(text = recognizedText, color = onPrimaryTextColor, fontSize = 18.sp)
+                                }
                             }
                         }
                     }
@@ -308,11 +308,11 @@ private fun LanguageChip(
         shape = RoundedCornerShape(50.dp),
         modifier = modifier
             .wrapContentSize()
-            .height(60.dp)
-            .width(140.dp),
+            .height(50.dp)
+            .width(130.dp),
         label = {
             Text(
-                fontSize = 24.sp,
+                fontSize = 20.sp,
                 modifier = Modifier
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center,

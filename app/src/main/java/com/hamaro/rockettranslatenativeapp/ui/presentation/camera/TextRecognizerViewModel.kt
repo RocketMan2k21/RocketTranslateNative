@@ -32,7 +32,11 @@ class TextRecognizerViewModel(
                     .recognizeText(scaledBitMap)
 
                 if (!result.isError())
-                    _imageText.value = ImageTextUiState.Success(result.getSuccessData())
+                    if (result.getSuccessData().isNotBlank())
+                        _imageText.value = ImageTextUiState.Success(result.getSuccessData())
+                    else {
+                        _imageText.value = ImageTextUiState.Error("No text Recognized, please try again")
+                    }
                 else {
                     _imageText.value = ImageTextUiState.Error("Unable to process image, please try again")
                 }

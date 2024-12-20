@@ -39,3 +39,4 @@ val borderStrokeColor : Color
     get() = if(isSystemInDarkTheme()) Color.White
     else grayBlack
 val grayBlack = Color(0xff495057)
+val blackHalfTransparent = Color(0x80000000)
