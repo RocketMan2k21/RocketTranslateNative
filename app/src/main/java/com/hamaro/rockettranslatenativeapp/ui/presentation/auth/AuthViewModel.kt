@@ -40,8 +40,7 @@ class AuthViewModel(
 
     val isButtonEnabled: StateFlow<Boolean> = combine(uiState) { states ->
         val state = states.first()
-        state.email.isNotBlank() && state.password.isNotBlank() && (state.confirmationPassword.isNotBlank()
-                || state.confirmationPassword.equals(state.password))
+        state.email.isNotBlank() && state.password.isNotBlank()
     }.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), false
     )

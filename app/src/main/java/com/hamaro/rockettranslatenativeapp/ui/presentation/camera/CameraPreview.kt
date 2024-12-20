@@ -166,6 +166,7 @@ fun CameraPreview(
                     imageCapture,
                     context,
                     onSuccess = { uri ->
+                        imageViewModel.saveImage(context, uri)
                         val uriToBase64 = ImageUtils.uriToBase64(context, uri)
                         uriToBase64?.let {
                             navigateToPhoto(it)

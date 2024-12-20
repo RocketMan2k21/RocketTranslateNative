@@ -12,7 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.hamaro.rockettranslatenativeapp.MainViewModel
 import com.hamaro.rockettranslatenativeapp.ui.navigation.home.SetupHomeNavigation
 import com.hamaro.rockettranslatenativeapp.ui.navigation.route.HomeDestination
-import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.CameraPermission
+import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.CameraPermissionScreen
 
 fun NavGraphBuilder.mainComposable() {
     composable(
