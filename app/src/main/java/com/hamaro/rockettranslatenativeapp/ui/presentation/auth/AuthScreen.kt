@@ -1,10 +1,12 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.auth
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +30,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hamaro.rockettranslatenativeapp.domain.model.UiState
 import com.hamaro.rockettranslatenativeapp.domain.model.User
 import org.koin.androidx.compose.koinViewModel
 
@@ -42,8 +45,9 @@ fun AuthScreen(
     val emailError by viewModel.emailError.collectAsState()
     val passwordError by viewModel.passwordError.collectAsState()
     val isProcessing by viewModel.isProcessing.collectAsState()
-    val isButtonEnabled by viewModel.isProcessing.collectAsState()
+    val isButtonEnabled by viewModel.isButtonEnabled.collectAsState()
     val currentUser by viewModel.currentUser.collectAsState()
+    val authState by viewModel.authState.collectAsState()
 
 
     LoginScreenContent(
@@ -53,7 +57,10 @@ fun AuthScreen(
         onSignInClick = { viewModel.onSignInClick() },
         isProcessing = isProcessing,
         currentUser = currentUser,
-        isError = emailError || passwordError,
+        isButtonEnabled = isButtonEnabled,
+        authErrorState = authState,
+        isPasswordError = passwordError,
+        isEmailError = emailError,
         onSignOut = viewModel::onSignOut,
         onSignIn = onSuccessSignIn
     )
@@ -64,12 +71,15 @@ fun AuthScreen(
 fun LoginScreenContent(
     modifier: Modifier = Modifier,
     uiState: LoginUiState,
+    authErrorState: UiState<Unit>,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSignInClick: () -> Unit,
     isProcessing: Boolean,
     currentUser: User?,
-    isError: Boolean,
+    isButtonEnabled : Boolean,
+    isPasswordError: Boolean,
+    isEmailError : Boolean,
     onSignOut: () -> Unit,
     onSignIn: () -> Unit,
 ) {
@@ -99,10 +109,17 @@ fun LoginScreenContent(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(), value = uiState.email, label = {
                     Text("Email")
-                }, onValueChange = onEmailChange
+                }, onValueChange = onEmailChange,
+                isError = isEmailError
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            AnimatedVisibility(isEmailError) {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                    Text("Invalid email", color = MaterialTheme.colorScheme.error)
+                }
+            }
 
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -111,18 +128,29 @@ fun LoginScreenContent(
                 label = {
                     Text("Password")
                 },
-                onValueChange = onPasswordChange
+                onValueChange = onPasswordChange,
+                isError = isPasswordError
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            AnimatedVisibility(isPasswordError) {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                    Text("Invalid password", color = MaterialTheme.colorScheme.error)
+                }
+            }
+
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp), onClick = onSignInClick
+                    .height(48.dp), onClick = onSignInClick,
+                enabled = isButtonEnabled,
+                contentPadding = PaddingValues(4.dp)
             ) {
                 if (isProcessing) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 } else {
                     Text("SIGN IN")
                 }
@@ -136,13 +164,20 @@ fun LoginScreenContent(
 
                 if (currentUser != null && !currentUser.isAnonymous) {
                     Log.d("AuthScreen", "Logging in...")
-                    //onSignIn()
+                    onSignIn()
                 }
             }
 
-            AnimatedVisibility(isError) {
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
-                    Text("Error in email or password!", color = MaterialTheme.colorScheme.error)
+            AnimatedContent(authErrorState, label = "") {
+                when(it) {
+                    is UiState.Error -> {
+                        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                            Text(it.message, color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                    UiState.Idle -> Unit
+                    UiState.Loading -> Unit
+                    is UiState.Success -> Unit
                 }
             }
 
