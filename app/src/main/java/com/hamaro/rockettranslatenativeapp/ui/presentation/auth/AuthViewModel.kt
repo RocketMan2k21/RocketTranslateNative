@@ -35,15 +35,20 @@ class AuthViewModel(
     private val _isProcessing = MutableStateFlow(false)
     val isProcessing = _isProcessing.asStateFlow()
 
+    private val _confirmPasswordError = MutableStateFlow(false)
+    val confirmationPassword = _confirmPasswordError.asStateFlow()
+
     val isButtonEnabled: StateFlow<Boolean> = combine(uiState) { states ->
         val state = states.first()
-        state.email.isNotBlank() && state.password.isNotBlank()
+        state.email.isNotBlank() && state.password.isNotBlank() && (state.confirmationPassword.isNotBlank()
+                || state.confirmationPassword.equals(state.password))
     }.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(5000), false
     )
 
     private val _authState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val authState: StateFlow<UiState<Unit>> = _authState.asStateFlow()
+
 
     init {
         launchWithCatchingException {
@@ -73,6 +78,12 @@ class AuthViewModel(
         _uiState.update { it.copy(password = newValue.trim()) }
         //reset error
         if (newValue.isNotBlank()) _passwordError.value = false
+    }
+
+    fun onConfirmationPasswordChange(newValue : String) {
+        _uiState.update { it.copy(confirmationPassword = newValue.trim()) }
+        //reset error
+        if (newValue.isNotBlank() && newValue == _uiState.value.password) _authState.value = UiState.Idle
     }
 
     fun onSignInClick() {
@@ -116,6 +127,11 @@ class AuthViewModel(
             return
         }
 
+        if (_uiState.value.confirmationPassword.isEmpty() || _uiState.value.confirmationPassword != _uiState.value.password) {
+            _authState.value = UiState.Error("The passwords don't match")
+            return
+        }
+
         _isProcessing.value = true
 
         launchWithCatchingException {
@@ -132,5 +148,7 @@ class AuthViewModel(
 
 data class LoginUiState(
     val email: String = "",
-    val password: String = ""
+    val password: String = "",
+    val confirmationPassword : String = ""
 )
+

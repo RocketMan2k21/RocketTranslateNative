@@ -63,10 +63,11 @@ class AuthServiceImpl(
 
     override suspend fun createUser(email: String, password: String) {
         try {
-            auth.createUserWithEmailAndPassword(email, password)
-        } catch (e : Exception) {
+            auth.createUserWithEmailAndPassword(email, password).await()
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            _authExceptionFlow.emit(e.message ?: "Invalid email format")
+        } catch (e: Exception) {
             _authExceptionFlow.emit(e.message ?: "Authentication failed")
-            throw e
         }
     }
 
