@@ -3,11 +3,8 @@ package com.hamaro.rockettranslatenativeapp.ui.presentation.camera
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Space
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,41 +15,31 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.sharp.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,14 +48,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.hamaro.rockettranslatenativeapp.R
 import com.hamaro.rockettranslatenativeapp.data.CameraCaptureService
-import com.hamaro.rockettranslatenativeapp.domain.model.TargetLanguage
-import com.hamaro.rockettranslatenativeapp.domain.model.UiState
 import com.hamaro.rockettranslatenativeapp.ui.common.FeedbackIconButton
-import com.hamaro.rockettranslatenativeapp.ui.common.SharedViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.history.ImageViewModel
 import com.hamaro.rockettranslatenativeapp.ui.theme.Typography
 import com.hamaro.rockettranslatenativeapp.ui.theme.backGroundForCameraPreviewBounds
@@ -76,10 +60,11 @@ import com.hamaro.rockettranslatenativeapp.ui.theme.cameraPreviewIconColor
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
 import com.hamaro.rockettranslatenativeapp.ui.theme.textCameraColor
 import com.roman_duda.rockettranslateapp.utils.ImageUtils
-import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import java.io.File
 
 @Composable
 fun CameraPreview(
@@ -92,6 +77,8 @@ fun CameraPreview(
 
     val imageText by remember {viewModel.imageText}
 
+    val coroutineScope = rememberCoroutineScope()
+
     val lensFacing = CameraSelector.LENS_FACING_BACK
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -101,7 +88,9 @@ fun CameraPreview(
     }
     val cameraxSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
     val imageCapture = remember {
-        ImageCapture.Builder().build()
+        ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .build()
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -121,9 +110,15 @@ fun CameraPreview(
 
     LaunchedEffect(lensFacing) {
         val cameraProvider = context.getCameraProvider()
-        cameraProvider.unbindAll()
-        cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
-        preview.surfaceProvider = previewView.surfaceProvider
+        try {
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner, cameraxSelector, preview, imageCapture
+            )
+            preview.surfaceProvider = previewView.surfaceProvider
+        } catch (e: Exception) {
+            Log.e("CameraPreview", "Failed to bind camera use cases: ${e.message}")
+        }
     }
 
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier
@@ -175,13 +170,16 @@ fun CameraPreview(
                         uriToBase64?.let {
                             navigateToPhoto(it)
                         }
+                        uri.path?.let { File(it).delete() }
                     },
                     onError = {
+
                         Toast.makeText(
                             context,
                             "Error while capturing image, please try again",
                             Toast.LENGTH_LONG
                         ).show()
+                        coroutineScope.launch { restartCamera(context, lifecycleOwner, cameraxSelector, preview, imageCapture) }
                     }
                 )
             }
@@ -221,6 +219,18 @@ fun CameraPreview(
     }
 
 
+}
+
+private suspend fun restartCamera(
+    context: Context,
+    lifecycleOwner: LifecycleOwner,
+    cameraxSelector: CameraSelector,
+    preview: Preview,
+    imageCapture: ImageCapture
+) {
+    val cameraProvider = context.getCameraProvider()
+    cameraProvider.unbindAll()
+    cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
 }
 
 @Composable
@@ -307,10 +317,6 @@ fun PreviewMainButton(){
 }
 
 suspend fun Context.getCameraProvider(): ProcessCameraProvider =
-    suspendCoroutine { continuation ->
-        ProcessCameraProvider.getInstance(this).also { cameraProvider ->
-            cameraProvider.addListener({
-                continuation.resume(cameraProvider.get())
-            }, ContextCompat.getMainExecutor(this))
-        }
+    withContext(Dispatchers.IO) {
+        ProcessCameraProvider.getInstance(this@getCameraProvider).get()
     }

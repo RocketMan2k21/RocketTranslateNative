@@ -48,12 +48,6 @@ class AuthServiceImpl(
         awaitClose { auth.removeAuthStateListener(authStateListener) }
     }
 
-    private suspend fun launchWithAwait(block : suspend  () -> Unit) {
-        scope.async {
-            block()
-        }.await()
-    }
-
     override suspend fun authenticate(email: String, password: String) {
         try {
             auth.signInWithEmailAndPassword(email, password).await()
@@ -68,8 +62,12 @@ class AuthServiceImpl(
 
 
     override suspend fun createUser(email: String, password: String) {
-        val result = launchWithAwait {
-            auth.createUserWithEmailAndPassword(email, password)
+        try {
+            auth.createUserWithEmailAndPassword(email, password).await()
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            _authExceptionFlow.emit(e.message ?: "Invalid email format")
+        } catch (e: Exception) {
+            _authExceptionFlow.emit(e.message ?: "Authentication failed")
         }
     }
 

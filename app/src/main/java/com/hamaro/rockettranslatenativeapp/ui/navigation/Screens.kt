@@ -9,4 +9,8 @@ class Screens(navController: NavHostController) {
             popUpTo(0)
         }
     }
+
+    val signUp: () -> Unit = {
+        navController.navigate(MainViewModel.Destination.SignUp.route)
+    }
 }

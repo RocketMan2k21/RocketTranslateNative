@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import com.hamaro.rockettranslatenativeapp.MainViewModel
 import com.hamaro.rockettranslatenativeapp.ui.navigation.screens.authComposable
 import com.hamaro.rockettranslatenativeapp.ui.navigation.screens.mainComposable
+import com.hamaro.rockettranslatenativeapp.ui.navigation.screens.signUpComposable
 
 @Composable
 fun SetupNavigation(
@@ -23,10 +24,13 @@ fun SetupNavigation(
         startDestination = startDestination.route
     ) {
         authComposable(
-            navController
+            navController = navController,
+            navigateToSignUp = screen.signUp
         )
-        mainComposable(
-
+        mainComposable()
+        signUpComposable(
+            navController = navController,
+            navigateToAuth = screen.auth
         )
     }
 }
