@@ -5,19 +5,20 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.hamaro.rockettranslatenativeapp.MainViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.auth.AuthScreen
+import com.hamaro.rockettranslatenativeapp.ui.presentation.auth.SignUpScreen
 
-fun NavGraphBuilder.authComposable(
+fun NavGraphBuilder.signUpComposable(
     navController: NavHostController,
-    navigateToSignUp : () -> Unit
+    navigateToAuth : () -> Unit
 ) {
-    composable(MainViewModel.Destination.Auth.route) {
-        AuthScreen(
+    composable(MainViewModel.Destination.SignUp.route) {
+        SignUpScreen(
             onSuccessSignIn = {
                 navController.navigate(MainViewModel.Destination.Main.route) {
                     popUpTo(0)
                 }
             },
-            navigateToSignUpPage = navigateToSignUp
+            navigateToAuthScreen = navigateToAuth
         )
     }
 }

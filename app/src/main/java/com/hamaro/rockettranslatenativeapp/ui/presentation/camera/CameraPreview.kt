@@ -3,8 +3,6 @@ package com.hamaro.rockettranslatenativeapp.ui.presentation.camera
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
@@ -16,6 +14,8 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,42 +27,44 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.hamaro.rockettranslatenativeapp.R
 import com.hamaro.rockettranslatenativeapp.data.CameraCaptureService
-import com.hamaro.rockettranslatenativeapp.domain.model.TargetLanguage
-import com.hamaro.rockettranslatenativeapp.domain.model.UiState
 import com.hamaro.rockettranslatenativeapp.ui.common.FeedbackIconButton
-import com.hamaro.rockettranslatenativeapp.ui.common.SharedViewModel
 import com.hamaro.rockettranslatenativeapp.ui.presentation.history.ImageViewModel
+import com.hamaro.rockettranslatenativeapp.ui.theme.Typography
+import com.hamaro.rockettranslatenativeapp.ui.theme.backGroundForCameraPreviewBounds
 import com.hamaro.rockettranslatenativeapp.ui.theme.cameraPreviewIconColor
 import com.hamaro.rockettranslatenativeapp.ui.theme.onPrimaryTextColor
+import com.hamaro.rockettranslatenativeapp.ui.theme.textCameraColor
 import com.roman_duda.rockettranslateapp.utils.ImageUtils
-import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import java.io.File
 
 @Composable
 fun CameraPreview(
@@ -74,10 +76,8 @@ fun CameraPreview(
 ) {
 
     val imageText by remember {viewModel.imageText}
-    val translatedText by remember {translationViewModel.translationState}
-    val savedImageState by remember {imageViewModel.savedImageState}
 
-    val currentText by remember{translationViewModel.currentText}
+    val coroutineScope = rememberCoroutineScope()
 
     val lensFacing = CameraSelector.LENS_FACING_BACK
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -88,7 +88,9 @@ fun CameraPreview(
     }
     val cameraxSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
     val imageCapture = remember {
-        ImageCapture.Builder().build()
+        ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .build()
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -108,87 +110,81 @@ fun CameraPreview(
 
     LaunchedEffect(lensFacing) {
         val cameraProvider = context.getCameraProvider()
-        cameraProvider.unbindAll()
-        cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
-        preview.surfaceProvider = previewView.surfaceProvider
+        try {
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner, cameraxSelector, preview, imageCapture
+            )
+            preview.surfaceProvider = previewView.surfaceProvider
+        } catch (e: Exception) {
+            Log.e("CameraPreview", "Failed to bind camera use cases: ${e.message}")
+        }
     }
+
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier
         .fillMaxSize()
         ) {
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
 
-        FeedbackIconButton(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-        )
+        UpperOptionBlock(modifier = Modifier.align(Alignment.TopCenter), navigateToPhotoHistory = navigateToPhotoHistory)
 
-        Icon(
+
+        Box(){
+
+        }
+        IconButton(
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
-                .clickable { navigateToPhotoHistory() },
-            painter = painterResource(R.drawable.baseline_history_24),
-            tint = Color.White,
-            contentDescription = ""
-        )
+                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                .padding(16.dp)
+                .align(Alignment.BottomStart),
+            onClick = {
+                val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                galleryLauncher.launch(intent)
+            }
+        ) {
+            Icon(
+                modifier = Modifier.size(40.dp),
+                painter = painterResource(R.drawable.baseline_photo_library_24),
+                tint = cameraPreviewIconColor,
+                contentDescription = "galleryPick"
+            )
+        }
 
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
+                .fillMaxWidth()
+                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+            horizontalArrangement = Arrangement.SpaceAround // This centers the content of the Row
         ) {
+            // Spacer to push IconButton to the left
 
-            Button(
+            // MainButtonCapture in the center
+            MainButtonCapture(
                 modifier = Modifier
-                    .padding(bottom =
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-                onClick = {
-                    CameraCaptureService.captureImage(
-                        imageCapture,
-                        context,
-                        onSuccess = { uri ->
-                            val uriToBitmap = ImageUtils.uriToBitmap(context, uri)
-                            uriToBitmap?.let {
-                                viewModel.recognizeImage(it)
-                                imageViewModel.saveImage(context, uri)
-                            }
-                        },
-                        onError = {
-                            Toast.makeText(
-                                context,
-                                "Error while capturing image, please try again",
-                                Toast.LENGTH_LONG
-                            ).show()
+            ) {
+                CameraCaptureService.captureImage(
+                    imageCapture,
+                    context,
+                    onSuccess = { uri ->
+                        imageViewModel.saveImage(context, uri)
+                        val uriToBase64 = ImageUtils.uriToBase64(context, uri)
+                        uriToBase64?.let {
+                            navigateToPhoto(it)
                         }
-                    )
-                }) {
-                Text(text = "Capture Image")
-            }
+                        uri.path?.let { File(it).delete() }
+                    },
+                    onError = {
 
-            Button(
-                modifier = Modifier
-                    .padding(bottom =
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-                onClick = {
-                    translationViewModel.translateText(currentText, targetLanguage = TargetLanguage.DE.lang)
-                },
-                enabled = currentText.isNotBlank()
-            ) {
-                Text(text = "Translate text")
-            }
-
-            IconButton(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                    galleryLauncher.launch(intent)
-                }
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.baseline_photo_library_24),
-                    tint = cameraPreviewIconColor,
-                    contentDescription = "galleryPick"
+                        Toast.makeText(
+                            context,
+                            "Error while capturing image, please try again",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        coroutineScope.launch { restartCamera(context, lifecycleOwner, cameraxSelector, preview, imageCapture) }
+                    }
                 )
             }
+
         }
     }
 
@@ -221,56 +217,107 @@ fun CameraPreview(
                     }
                 }
             }
-
-            when (translatedText) {
-                is TranslationUiState.Error -> {
-                    val error = (translatedText as TranslationUiState.Error).message
-                    Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-                }
-
-                TranslationUiState.Idle -> {
-
-                }
-
-                TranslationUiState.Loading -> {
-                    CircularProgressIndicator()
-                }
-
-                is TranslationUiState.Success -> {
-                    val data = (translatedText as TranslationUiState.Success).text
-                    AnimatedContent(data, label = "") { text: String ->
-                        Text(text, color = onPrimaryTextColor)
-                    }
-                }
-
-        }
-
-        when (savedImageState) {
-            is UiState.Error -> {
-                val error = (savedImageState as UiState.Error).message
-                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-            }
-            UiState.Idle -> {
-
-            }
-            UiState.Loading -> {
-
-            }
-            is UiState.Success -> {
-                val data = (savedImageState as UiState.Success<String>).data
-                Toast.makeText(context, data, Toast.LENGTH_LONG).show()
-            }
-        }
     }
 
 
 }
 
-private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
-    suspendCoroutine { continuation ->
-        ProcessCameraProvider.getInstance(this).also { cameraProvider ->
-            cameraProvider.addListener({
-                continuation.resume(cameraProvider.get())
-            }, ContextCompat.getMainExecutor(this))
+private suspend fun restartCamera(
+    context: Context,
+    lifecycleOwner: LifecycleOwner,
+    cameraxSelector: CameraSelector,
+    preview: Preview,
+    imageCapture: ImageCapture
+) {
+    val cameraProvider = context.getCameraProvider()
+    cameraProvider.unbindAll()
+    cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
+}
+
+@Composable
+private fun UpperOptionBlock(
+    modifier: Modifier = Modifier,
+    navigateToPhotoHistory: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = backGroundForCameraPreviewBounds)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(WindowInsets.statusBars.asPaddingValues())
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Icon(
+                modifier = Modifier
+                    .size(30.dp)
+                    ,
+                painter = painterResource(R.drawable.baseline_flash_on_24),
+                tint = Color.White,
+                contentDescription = ""
+            )
+
+            Icon(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clickable { navigateToPhotoHistory() },
+                painter = painterResource(R.drawable.baseline_history_24),
+                tint = Color.White,
+                contentDescription = ""
+            )
+
+            FeedbackIconButton(
+                modifier = Modifier
+
+            )
         }
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview
+@Composable
+fun PreviewUpperBlock() {
+    UpperOptionBlock {
+
+    }
+}
+
+@Composable
+fun MainButtonCapture(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = modifier
+            .size(80.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onClick),
+        border = BorderStroke(2.dp, color = cameraPreviewIconColor),
+        shape = CircleShape,
+        color = Color.Transparent
+    ) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(5.dp)
+                .clip(CircleShape)
+                .background(color = cameraPreviewIconColor)
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview
+@Composable
+fun PreviewMainButton(){
+    MainButtonCapture {  }
+}
+
+suspend fun Context.getCameraProvider(): ProcessCameraProvider =
+    withContext(Dispatchers.IO) {
+        ProcessCameraProvider.getInstance(this@getCameraProvider).get()
     }

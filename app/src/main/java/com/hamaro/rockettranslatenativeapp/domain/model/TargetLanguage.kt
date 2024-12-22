@@ -5,3 +5,8 @@ enum class TargetLanguage(val lang : String) {
     EN("EN"),
     FR("FR")
 }
+
+enum class LanguageType(val type : String) {
+    SOURCE("source"),
+    TARGET("target")
+}

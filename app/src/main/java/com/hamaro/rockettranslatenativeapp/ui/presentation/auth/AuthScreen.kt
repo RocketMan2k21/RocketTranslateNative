@@ -1,12 +1,18 @@
 package com.hamaro.rockettranslatenativeapp.ui.presentation.auth
 
 import android.util.Log
+import android.widget.Space
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,127 +32,114 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hamaro.rockettranslatenativeapp.domain.model.UiState
 import com.hamaro.rockettranslatenativeapp.domain.model.User
+import com.hamaro.rockettranslatenativeapp.ui.theme.Typography
+import com.hamaro.rockettranslatenativeapp.ui.theme.grayBlack
 import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun AuthScreen(
     viewModel: AuthViewModel = koinViewModel(),
-    onSuccessSignIn : () -> Unit
+    onSuccessSignIn: () -> Unit,
+    navigateToSignUpPage: () -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
     val emailError by viewModel.emailError.collectAsState()
     val passwordError by viewModel.passwordError.collectAsState()
     val isProcessing by viewModel.isProcessing.collectAsState()
-    val isButtonEnabled by viewModel.isProcessing.collectAsState()
+    val isButtonEnabled by viewModel.isButtonEnabled.collectAsState()
     val currentUser by viewModel.currentUser.collectAsState()
+    val authState by viewModel.authState.collectAsState()
 
+    Column (
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            modifier = Modifier
+                .height(100.dp)
+                .fillMaxWidth()
+            ,
+            text = "Welcome to Rocket Translate!",
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp
+        )
 
-    LoginScreenContent(
-        uiState = uiState,
-        onEmailChange = viewModel::onEmailChange,
-        onPasswordChange = viewModel::onPasswordChange,
-        onSignInClick = { viewModel.onSignInClick() },
-        isProcessing = isProcessing,
-        currentUser = currentUser,
-        isError = emailError || passwordError,
-        onSignOut = viewModel::onSignOut,
-        onSignIn = onSuccessSignIn
-    )
+        Spacer(Modifier.height(20.dp))
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth(),
+            text = "Sign In",
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp
+        )
+
+        Spacer(Modifier.height(20.dp))
+
+        AuthContent(
+            uiState = uiState,
+            onEmailChange = viewModel::onEmailChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onSignInClick = { viewModel.onSignInClick() },
+            isProcessing = isProcessing,
+            currentUser = currentUser,
+            isButtonEnabled = isButtonEnabled,
+            authErrorState = authState,
+            isPasswordError = passwordError,
+            isEmailError = emailError,
+            onSignOut = viewModel::onSignOut,
+            onSignIn = onSuccessSignIn
+        )
+
+       SignUpClickable{ navigateToSignUpPage() }
+    }
 }
 
 
 @Composable
-fun LoginScreenContent(
+fun SignUpClickable(
     modifier: Modifier = Modifier,
-    uiState: LoginUiState,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onSignInClick: () -> Unit,
-    isProcessing: Boolean,
-    currentUser: User?,
-    isError: Boolean,
-    onSignOut: () -> Unit,
-    onSignIn: () -> Unit,
+    navigateToSignUpScreen : () -> Unit
 ) {
-
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+    Column(
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val width = this.maxWidth
-        val finalModifier = if (width >= 780.dp) modifier.width(400.dp) else modifier.fillMaxWidth()
-        Column(
-            modifier = finalModifier
-                .padding(16.dp)
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = "Don't have any account?",
+            style = Typography.bodyLarge,
+            color = grayBlack
+        )
 
-            Text(
-                text = "Welcome to Rocket Translate App",
-                textAlign = TextAlign.Center,
-                fontSize = 24.sp
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(), value = uiState.email, label = {
-                    Text("Email")
-                }, onValueChange = onEmailChange
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = uiState.password,
-                visualTransformation = PasswordVisualTransformation(),
-                label = {
-                    Text("Password")
-                },
-                onValueChange = onPasswordChange
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp), onClick = onSignInClick
-            ) {
-                if (isProcessing) {
-                    CircularProgressIndicator()
-                } else {
-                    Text("SIGN IN")
-                }
-            }
-
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LaunchedEffect(currentUser) {
-                Log.d("AuthScreen", "Try to sign in")
-
-                if (currentUser != null && !currentUser.isAnonymous) {
-                    Log.d("AuthScreen", "Logging in...")
-                    //onSignIn()
-                }
-            }
-
-            AnimatedVisibility(isError) {
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
-                    Text("Error in email or password!", color = MaterialTheme.colorScheme.error)
-                }
-            }
-
-        }
+        Text(
+            modifier = Modifier
+                .clickable { navigateToSignUpScreen() },
+            textAlign = TextAlign.Center,
+            text = "Sign Up",
+            color = MaterialTheme.colorScheme.primary,
+            style = Typography.labelLarge,
+            textDecoration = TextDecoration.Underline
+        )
     }
 
 }
+
+@Preview
+@Composable
+fun PreviewSignUp(){
+    SignUpClickable(){}
+}
+
+

@@ -5,7 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.hamaro.rockettranslatenativeapp.ui.navigation.route.HomeDestination
-import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.CameraPermission
+import com.hamaro.rockettranslatenativeapp.ui.presentation.camera.CameraPermissionScreen
 
 fun NavGraphBuilder.permissionComposable(
     navigateToCameraPreview: () -> Unit,
@@ -13,7 +13,7 @@ fun NavGraphBuilder.permissionComposable(
     composable(
         route = HomeDestination.Permission.route
     ) {
-        CameraPermission(
+        CameraPermissionScreen(
             onPermissionGranted = navigateToCameraPreview,
         )
     }
