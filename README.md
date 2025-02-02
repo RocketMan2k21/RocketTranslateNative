@@ -18,7 +18,9 @@ To launch the project, follow these steps:
    cd workout-logger
 
 2.
-  Open the project in Android Studio.
-  Select the Android target from the project selector.
-  Build and run the project on an Android emulator or device.
+     Open the project in Android Studio.
+     
+     Select the Android target from the project selector.
+     
+     Build and run the project on an Android emulator or device.
 
