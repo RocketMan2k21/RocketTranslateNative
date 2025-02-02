@@ -7,6 +7,7 @@ Fast and offline text recognition using CameraX and DeepL API for translating
 - Compose
 - CameraX & Permissions
 - Firebase Firestore for storing captures
+- Retrofit, OkHttp, Koin (DI)
 
 ## Launching the Project:
 
