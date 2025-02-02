@@ -15,7 +15,7 @@ To launch the project, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/workout-logger.git
+   git clone [https://github.com/yourusername/workout-logger.git](https://github.com/RocketMan2k21/RocketTranslateNative.git)
    cd workout-logger
 
 2.
